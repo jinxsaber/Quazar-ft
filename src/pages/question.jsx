@@ -31,7 +31,7 @@ const QuestionPage = () => {
     useEffect(() => {
         const fetchQuestion = async () => {
             const token = localStorage.getItem('authToken');
-            if (!token) return navigate('/login');
+            if (!token) return navigate('/');
 
             try {
                 const decoded = jwtDecode(token);
