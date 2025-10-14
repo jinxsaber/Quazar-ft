@@ -5,7 +5,7 @@ export default function RoundTwoLanding() {
   const navigate = useNavigate();
 
   const handleStart = () => {
-    navigate("/LoginForm");
+    navigate("/login");
   };
 
   return (
