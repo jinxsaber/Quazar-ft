@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { Send, CheckCircle, XCircle, Loader2, ExternalLink, Image as ImageIcon } from 'lucide-react';
 
 const QuestionPage = () => {
     const [loading, setLoading] = useState(true);
@@ -9,9 +10,8 @@ const QuestionPage = () => {
     const [answer, setAnswer] = useState('');
     const [message, setMessage] = useState(null);
     const navigate = useNavigate();
-    const userIdRef = useRef(null); 
+    const userIdRef = useRef(null);
 
-    // Update user level
     const updateUserLevel = async (authToken, userId) => {
         try {
             await axios.put(`${import.meta.env.VITE_PUBLIC_API}levels/${userId}`, {}, {
@@ -27,7 +27,6 @@ const QuestionPage = () => {
         }
     };
 
-    // Fetch Question
     useEffect(() => {
         const fetchQuestion = async () => {
             const token = localStorage.getItem('authToken');
@@ -49,7 +48,6 @@ const QuestionPage = () => {
 
                 const { data: question, isLastQuestion } = questionResponse.data;
 
-                // ✅ Redirect to Congratulations page if last question
                 if (isLastQuestion) {
                     navigate('/congratulations');
                     return;
@@ -68,7 +66,6 @@ const QuestionPage = () => {
         fetchQuestion();
     }, [navigate]);
 
-    // Submit answer
     const handleSubmitAnswer = async () => {
         if (!answer.trim()) {
             setMessage({ type: 'error', text: 'Please enter an answer.' });
@@ -98,72 +95,101 @@ const QuestionPage = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-gray-50">
-                <div className="text-xl font-medium text-gray-600 animate-pulse">
-                    Loading question...
+            <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
+
+                <div className="relative z-10 text-center">
+                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+                    <div className="text-xl font-medium text-slate-600">
+                        Loading question...
+                    </div>
                 </div>
             </div>
         );
     }
 
     if (questionData) {
-        const messageClass = message
-            ? message.type === 'success'
-                ? 'bg-green-100 text-green-700 border-green-400'
-                : 'bg-red-100 text-red-700 border-red-400'
-            : '';
-
         return (
-            <div className="flex flex-col items-center min-h-screen bg-gray-50 p-6 sm:p-8">
-                <div className="w-full max-w-4xl bg-white p-6 rounded-2xl shadow-2xl border border-gray-100 space-y-8">
-                    <div className="text-center text-lg font-bold text-indigo-700">
-                        Current Question UID: {questionData.UID}
-                    </div>
+            <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
 
-                    <div className="flex justify-center items-center p-4">
-                        <img
-                            src={questionData.image_url}
-                            alt={`Question ${questionData.UID}`}
-                            className="rounded-xl shadow-xl max-w-full h-auto object-contain border-4 border-indigo-100 transform transition duration-500 hover:scale-[1.01]"
-                            style={{ maxHeight: '80vh', maxWidth: '100%' }}
-                        />
-                    </div>
+                <div className="absolute inset-0 opacity-20">
+                    <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <div className="absolute top-40 right-32 w-1 h-1 bg-sky-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute bottom-32 left-1/3 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                </div>
 
-                    {questionData.link && (
-                        <div className="text-center">
-                            <a
-                                href={questionData.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-block px-6 py-2 bg-indigo-600 text-white font-semibold text-sm rounded-full shadow-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105"
-                            >
-                                {questionData.link}
-                            </a>
+                <div className="relative z-10 max-w-5xl mx-auto">
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-600 to-sky-600 p-6 text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+                                <ImageIcon className="w-4 h-4 text-white" />
+                                <span className="text-sm font-semibold text-white tracking-wide">
+                                    Question UID: {questionData.UID}
+                                </span>
+                            </div>
                         </div>
-                    )}
 
-                    {message && (
-                        <div className={`p-3 rounded-lg border-l-4 font-medium text-center ${messageClass}`}>
-                            {message.text}
+                        <div className="p-8 space-y-6">
+                            <div className="flex justify-center items-center bg-slate-50 rounded-xl p-6 border border-slate-200">
+                                <img
+                                    src={questionData.image_url}
+                                    alt={`Question ${questionData.UID}`}
+                                    className="rounded-lg shadow-lg max-w-full h-auto object-contain transition duration-300 hover:shadow-xl"
+                                    style={{ maxHeight: '70vh', maxWidth: '100%' }}
+                                />
+                            </div>
+
+                            {questionData.link && (
+                                <div className="text-center">
+                                    <a
+                                        href={questionData.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl border border-slate-200 transition duration-300 hover:shadow-md"
+                                    >
+                                        <ExternalLink className="w-4 h-4" />
+                                        <span>{questionData.link}</span>
+                                    </a>
+                                </div>
+                            )}
+
+                            {message && (
+                                <div className={`flex items-center gap-3 p-4 rounded-xl border ${
+                                    message.type === 'success'
+                                        ? 'bg-green-50 border-green-200 text-green-700'
+                                        : 'bg-red-50 border-red-200 text-red-700'
+                                }`}>
+                                    {message.type === 'success' ? (
+                                        <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                                    ) : (
+                                        <XCircle className="w-5 h-5 flex-shrink-0" />
+                                    )}
+                                    <span className="font-medium">{message.text}</span>
+                                </div>
+                            )}
+
+                            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <input
+                                        type="text"
+                                        placeholder="Type your answer here..."
+                                        value={answer}
+                                        onChange={(e) => setAnswer(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSubmitAnswer()}
+                                        className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleSubmitAnswer}
+                                        className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                                    >
+                                        <Send className="w-4 h-4" />
+                                        <span>Submit</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    )}
-
-                    <div className="w-full bg-white p-4 sm:p-6 rounded-xl shadow-inner border border-blue-200 flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                        <input
-                            type="text"
-                            placeholder="Type your answer here..."
-                            value={answer}
-                            onChange={(e) => setAnswer(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSubmitAnswer()}
-                            className="flex-1 p-3 border-2 border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 w-full"
-                        />
-                        <button
-                            type="button"
-                            onClick={handleSubmitAnswer}
-                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 ease-in-out transform hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                            Submit
-                        </button>
                     </div>
                 </div>
             </div>
@@ -171,9 +197,19 @@ const QuestionPage = () => {
     }
 
     return (
-        <div className="flex justify-center items-center min-h-screen bg-red-50 p-8">
-            <div className="text-xl font-semibold text-red-700 p-6 bg-white rounded-lg shadow-lg border-l-4 border-red-500">
-                Could not load question data. Please ensure the UID exists.
+        <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
+
+            <div className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-200 p-8">
+                <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0">
+                        <XCircle className="w-6 h-6 text-red-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-semibold text-slate-800 mb-2">Could Not Load Question</h3>
+                        <p className="text-slate-600">Please ensure the UID exists and try again.</p>
+                    </div>
+                </div>
             </div>
         </div>
     );
