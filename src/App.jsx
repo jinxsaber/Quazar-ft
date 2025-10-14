@@ -22,7 +22,7 @@ function App() {
         {/* <Route path="/LoginForm" element={<LoginForm/>} /> */}
 
         <Route
-          path="/LoginForm"
+          path="/login"
           element={token ? <Navigate to="/q" replace /> : <LoginForm />}
         />
 
