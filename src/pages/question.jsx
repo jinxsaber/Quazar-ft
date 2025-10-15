@@ -9,6 +9,7 @@ const QuestionPage = () => {
     const [questionData, setQuestionData] = useState(null);
     const [answer, setAnswer] = useState('');
     const [message, setMessage] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
     const userIdRef = useRef(null);
 
@@ -72,6 +73,8 @@ const QuestionPage = () => {
             return;
         }
 
+        setSubmitting(true); // ✅ Immediately disable the button
+
         try {
             const authToken = localStorage.getItem('authToken');
             const response = await axios.post(`${import.meta.env.VITE_PUBLIC_API}checkAnswer`, {
@@ -84,25 +87,25 @@ const QuestionPage = () => {
             if (response.data.success) {
                 setMessage({ type: 'success', text: 'Correct answer! Updating level...' });
                 await updateUserLevel(authToken, userIdRef.current);
+                // Keep the button disabled on correct answer
             } else {
                 setMessage({ type: 'error', text: 'Incorrect answer. Try again.' });
+                setSubmitting(false); // ✅ Re-enable for incorrect answer
             }
         } catch (error) {
             console.error("Error submitting answer:", error);
             setMessage({ type: 'error', text: 'Submission failed. Try again later.' });
+            setSubmitting(false); // ✅ Re-enable on failure
         }
     };
 
     if (loading) {
         return (
-            <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+            <div className="relative min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
-
                 <div className="relative z-10 text-center">
                     <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-                    <div className="text-xl font-medium text-slate-600">
-                        Loading question...
-                    </div>
+                    <div className="text-xl font-medium text-slate-600">Loading question...</div>
                 </div>
             </div>
         );
@@ -110,19 +113,13 @@ const QuestionPage = () => {
 
     if (questionData) {
         return (
-            <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
+            <div className="relative min-h-screen w-full bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-6">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
-
-                <div className="absolute inset-0 opacity-20">
-                    <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    <div className="absolute top-40 right-32 w-1 h-1 bg-sky-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                    <div className="absolute bottom-32 left-1/3 w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                </div>
 
                 <div className="relative z-10 max-w-5xl mx-auto">
                     <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
                         <div className="bg-gradient-to-r from-blue-600 to-sky-600 p-6 text-center">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full border border-white/30">
                                 <ImageIcon className="w-4 h-4 text-white" />
                                 <span className="text-sm font-semibold text-white tracking-wide">
                                     Question UID: {questionData.UID}
@@ -161,9 +158,9 @@ const QuestionPage = () => {
                                         : 'bg-red-50 border-red-200 text-red-700'
                                 }`}>
                                     {message.type === 'success' ? (
-                                        <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                                        <CheckCircle className="w-5 h-5" />
                                     ) : (
-                                        <XCircle className="w-5 h-5 flex-shrink-0" />
+                                        <XCircle className="w-5 h-5" />
                                     )}
                                     <span className="font-medium">{message.text}</span>
                                 </div>
@@ -182,10 +179,15 @@ const QuestionPage = () => {
                                     <button
                                         type="button"
                                         onClick={handleSubmitAnswer}
-                                        className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 whitespace-nowrap"
+                                        disabled={submitting}
+                                        className={`flex items-center justify-center gap-2 px-6 py-3 font-semibold rounded-xl transition-all duration-300 whitespace-nowrap
+                                            ${submitting
+                                                ? 'bg-blue-400 cursor-not-allowed shadow-none text-white'
+                                                : 'bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40'}
+                                        `}
                                     >
                                         <Send className="w-4 h-4" />
-                                        <span>Submit</span>
+                                        <span>{submitting ? 'Checking...' : 'Submit'}</span>
                                     </button>
                                 </div>
                             </div>
@@ -197,9 +199,8 @@ const QuestionPage = () => {
     }
 
     return (
-        <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8">
+        <div className="relative min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 p-8">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_50%),radial-gradient(circle_at_70%_80%,rgba(14,165,233,0.08),transparent_50%)]"></div>
-
             <div className="relative z-10 max-w-md w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-slate-200 p-8">
                 <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
