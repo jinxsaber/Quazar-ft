@@ -152,11 +152,10 @@ const QuestionPage = () => {
                             )}
 
                             {message && (
-                                <div className={`flex items-center gap-3 p-4 rounded-xl border ${
-                                    message.type === 'success'
+                                <div className={`flex items-center gap-3 p-4 rounded-xl border ${message.type === 'success'
                                         ? 'bg-green-50 border-green-200 text-green-700'
                                         : 'bg-red-50 border-red-200 text-red-700'
-                                }`}>
+                                    }`}>
                                     {message.type === 'success' ? (
                                         <CheckCircle className="w-5 h-5" />
                                     ) : (
@@ -173,7 +172,11 @@ const QuestionPage = () => {
                                         placeholder="Type your answer here..."
                                         value={answer}
                                         onChange={(e) => setAnswer(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleSubmitAnswer()}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !submitting) {
+                                                handleSubmitAnswer();
+                                            }
+                                        }}
                                         className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
                                     />
                                     <button
