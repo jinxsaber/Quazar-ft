@@ -11,6 +11,7 @@ import LoginForm from "./pages/login";
 import QuizApp from "./components/QuizApp";
 import QuestionPage from "./pages/question";
 import Congratulations from "./pages/Congratulations";
+import Leaderboard from "./pages/Leaderboard";
 function App() {
   const token = localStorage.getItem("authToken");
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/QuizApp" element={<QuizApp />} />
         <Route path="/q" element={<QuestionPage />} />
         <Route path="/congratulations" element={<Congratulations />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </Router>
   );
